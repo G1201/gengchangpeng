@@ -1,0 +1,66 @@
+#include<cstdio>
+#include<queue>
+#include<map>
+using namespace std;
+char arr[10],brr[10]="123456780";
+struct node{
+	int num,step,cost,zeroPos;
+	bool operator<(const node &a)const{
+		return cost>a.cost;
+	}
+	node(int n,int s,int p){
+		num=n,step=s,zeroPos=p;
+		setCost();
+	}
+	void setCost(){
+		char a[10];
+		int c=0;
+		sprintf(a,"%09d",num);
+		for(int i=0;i<9;i++)
+			if(a[i]!=brr[i])
+				c++;
+		cost=c+step;
+	}
+};
+int des=123804765;
+int changeId[9][4]={{-1,-1,3,1},{-1,0,4,2},{-1,1,5,-1},
+					{0,-1,6,4},{1,3,7,5},{2,4,8,-1},
+					{3,-1,-1,7},{4,6,-1,8},{5,7,-1,-1}};
+map<int,bool>mymap;
+priority_queue<node> que;//优先级队列 
+void swap(char* ch,int a,int b){char c=ch[a];ch[a]=ch[b];ch[b]=c;}
+int bfsHash(int start,int zeroPos){
+	char temp[10];
+	node tempN(start,0,zeroPos);//创建一个节点 
+	que.push(tempN);//压入优先级队列 
+	mymap[start]=1;//标记开始节点被访问过 
+	while(!que.empty()){
+		tempN=que.top();
+		que.pop();//弹出一个节点 
+		sprintf(temp,"%09d",tempN.num);
+		int pos=tempN.zeroPos,k;
+		for(int i=0;i<4;i++){
+			if(changeId[pos][i]!=-1){
+				swap(temp,pos,changeId[pos][i]);
+				sscanf(temp,"%d",&k);
+				if(k==des)return tempN.step+1;
+				if(mymap.count(k)==0){
+					node tempM(k,tempN.step+1,changeId[pos][i]);
+					que.push(tempM);//创建一个新节点并压入队列 
+					mymap[k]=1;
+				}
+				swap(temp,pos,changeId[pos][i]);
+			}
+		}
+	}
+}
+int main(){
+	int n,k,b;
+	scanf("%s",arr);
+	for(k=0;k<9;k++)
+		if(arr[k]=='0')break;
+	sscanf(arr,"%d",&n);
+	b=bfsHash(n,k);
+	printf("%d",b);	
+	return 0;
+}
